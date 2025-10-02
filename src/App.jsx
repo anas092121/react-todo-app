@@ -1,9 +1,11 @@
 import "./App.css";
+import { About } from "./components/About";
 import { AddTodo } from "./components/AddTodo";
 import { Footer } from "./components/Footer";
-import Header from "./components/header";
+import Header from "./components/Header";
 import { Todos } from "./components/Todos";
 import React, { useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 
 function App() {
   let initTodo;
@@ -13,44 +15,45 @@ function App() {
     initTodo = JSON.parse(localStorage.getItem("todos"));
   }
 
-  const onDelete = (todo) => {
-    console.log("On Delete Triggered", todo);
-    // todos.splice(todos.indexOf(todo), 1);
+  const [todos, setTodos] = useState(initTodo);
 
-    setTodos(
-      todos.filter((e) => {
-        return e !== todo;
-      })
-    );
-    localStorage.setItem("todos", JSON.stringify(todos));
+  const onDelete = (todo) => {
+    setTodos(todos.filter((e) => e !== todo));
   };
 
   const addTodo = (title, desc) => {
-    console.log("todo added", title, desc);
     const sno = todos.length > 0 ? todos[todos.length - 1].sno + 1 : 1;
     const myTodo = { sno, title, desc };
-    const exists = todos.some((todo) => todo.title === title);
-    if (exists) {
+
+    if (todos.some((todo) => todo.title === title)) {
       console.log("Todo with this title already exists");
       return;
     }
     setTodos([...todos, myTodo]);
-    console.log(myTodo);
   };
-
-  const [todos, setTodos] = useState(initTodo);
 
   useEffect(() => {
     localStorage.setItem("todos", JSON.stringify(todos));
   }, [todos]);
 
   return (
-    <>
+    <Router>
       <Header title="My Todo List" searchBar={false} />
-      <AddTodo addTodo={addTodo} />
-      <Todos todos={todos} onDelete={onDelete} />
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <AddTodo addTodo={addTodo} />
+              <Todos todos={todos} onDelete={onDelete} />
+            </>
+          }
+        />
+        <Route path="/about" element={<About />} />
+      </Routes>
+
       <Footer />
-    </>
+    </Router>
   );
 }
 
